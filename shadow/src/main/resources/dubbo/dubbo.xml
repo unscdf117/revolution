@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:dubbo="http://dubbo.apache.org/schema/dubbo"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans        http://www.springframework.org/schema/beans/spring-beans-4.3.xsd        http://dubbo.apache.org/schema/dubbo        http://dubbo.apache.org/schema/dubbo/dubbo.xsd">
+
+    <dubbo:application name="ShardingSphere_son_of_bitch"/>
+    <dubbo:registry protocol="zookeeper"
+                    address="192.168.181.135:2181"/>
+    <!-- 用dubbo协议在20880端口暴露服务 -->
+    <dubbo:protocol name="dubbo" port="20880"/>
+
+    <!--&lt;!&ndash;dubbo引用&ndash;&gt;-->
+    <!--<dubbo:reference interface="com.unsc.service.ItemService" id="itemService"/>-->
+
+    <!--&lt;!&ndash;dubbo暴露接口&ndash;&gt;-->
+    <dubbo:service interface="com.unsc.shard.shadow.facade.interfaces.UserBizFacade" ref="userBizFacade" timeout="500000"/>
+
+    <bean id="userBizFacade" class="com.unsc.shard.shadow.biz.facade.impl.UserBizFacadeImpl"></bean>
+
+</beans>

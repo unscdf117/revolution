@@ -1,0 +1,18 @@
+dataSources:
+  ds_master: !!com.alibaba.druid.pool.DruidDataSource
+    driverClassName: com.mysql.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/sharding1
+    username: root
+    password: 117
+  ds_slave0: !!com.alibaba.druid.pool.DruidDataSource
+    driverClassName: com.mysql.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/sharding2
+    username: root
+    password: 117
+
+masterSlaveRule:
+  name: ds_ms
+  masterDataSourceName: ds_master
+  slaveDataSourceNames: [ds_slave0]
+  props:
+    sql.show: true

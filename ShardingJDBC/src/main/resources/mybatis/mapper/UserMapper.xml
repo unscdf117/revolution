@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.unsc.shard.mapper.UserMapper">
+    <insert id="save" parameterType="com.unsc.shard.bean.User">
+        INSERT INTO t_user(id,name,phone,email,city_id,sex,password)
+        VALUES
+        (
+        #{id},#{name},#{phone},#{email},#{cityId},#{sex},#{password}
+        )
+    </insert>
+    
+    <select id="get" parameterType="string" resultType="com.unsc.shard.bean.User">
+    	select * from t_user where id = #{id}
+    </select>
+
+    <select id="findUser" parameterType="com.unsc.shard.bean.User" resultType="com.unsc.shard.bean.User">
+        select * from t_user
+        <where>
+            <if test="id != null and id != ''">
+                and id = #{id}
+            </if>
+            <if test="name != null and name != ''">
+                and name = #{name}
+            </if>
+            <if test="phone != null and phone != ''">
+                and phone = #{phone}
+            </if>
+            <if test="email != null and email != ''">
+                and email = #{email}
+            </if>
+            <if test="password != null and password != ''">
+                and password = #{password}
+            </if>
+            <if test="cityId != null and cityId != ''">
+                and cityId = #{cityId}
+            </if>
+            <if test="createTime != null and createTime != ''">
+                and createTime = #{createTime}
+            </if>
+            <if test="sex != null and sex != ''">
+                and sex = #{sex}
+            </if>
+        </where>
+        and 1 = 1
+    </select>
+</mapper>
