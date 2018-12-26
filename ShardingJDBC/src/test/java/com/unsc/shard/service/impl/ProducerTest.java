@@ -14,8 +14,8 @@ public class ProducerTest extends BaseTestCase {
     @Resource
     private Producer producer;
 
-    @Test
+    /*@Test
     public void testMsg() {
         producer.send();
-    }
+    }*/
 }

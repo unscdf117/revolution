@@ -17,10 +17,10 @@ import java.io.IOException;
 @Slf4j
 public class Comsumer {
 
-    @RabbitListener(queues = "queue-test")
+    /*@RabbitListener(queues = "queue-test")
     public void process(Message message, Channel channel) throws IOException {
         // 采用手动应答模式, 手动确认应答更为安全稳定
         channel.basicAck(message.getMessageProperties().getDeliveryTag(), true);
         log.info("receive: " + new String(message.getBody()));
-    }
+    }*/
 }

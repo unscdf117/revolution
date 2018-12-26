@@ -62,16 +62,16 @@ public class UserServiceImpl implements UserService {
         Map<String, Object> send = new HashMap<>();
         send.put("user", json);
         send.put("status", "try");
-        String result = tx.execute(transactionStatus -> {
+        Map<String, Object> res = (Map<String, Object>) rabbit.convertSendAndReceive("queue-test", send);
+        log.info("res : {}", res);
+        /*String result = tx.execute(transactionStatus -> {
             String flag = "Failure";
             try {
-                Map<String, Object> res = (Map<String, Object>) rabbit.convertSendAndReceive("queue-test", send);
-                log.info("res : {}", res);
                 if (res != null && res.get("status") != null && res.get("status").equals("200")) {
                     //消息prepare成功
                     Long save = userMapper.save(user);
-                    int i = 1 / 0;
-                    System.out.println(i);
+//                    int i = 1 / 0;
+//                    System.out.println(i);
                     if (save != null && save > 0) {
                         //save操作成功 发消息告知对方落地
                         flag = "success";
@@ -94,7 +94,7 @@ public class UserServiceImpl implements UserService {
                 }
             }
             return flag;
-        });
-        return result;
+        });*/
+        return "自己看日志";
     }
 }

@@ -11,17 +11,17 @@ import javax.annotation.Resource;
 @Component
 public class Producer {
 
-    @Resource
+    /*@Resource
     private RabbitTemplate rabbitTemplate;
 
-    /**
+    *//**
      * 给hello队列发送消息
-     */
+     *//*
     public void send() {
         for (int i = 0; i < 100; i++) {
             String msg = "hello, 序号: " + i;
             System.out.println("Producer, " + msg);
             rabbitTemplate.convertAndSend("queue-test", msg);
         }
-    }
+    }*/
 }

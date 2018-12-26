@@ -31,35 +31,8 @@ public class UserListener {
     public Map<String, Object> process(Message message, Channel channel) throws IOException {
         Map<String, Object> res = new HashMap<>();
         res.put("status", "500");
-        try {
-
-            log.info("receive: {}", message.getBody());
-            Map<String, Object> receive = JSON.parseObject(message.getBody(), Map.class);
-            if (receive != null && "try".equals(receive.get("status"))) {
-                //MQ中为待发送时
-                User user = (User) receive.get("user");
-                log.info("User : {}", user);
-                //落地
-                boolean flag = true;
-                if (flag) {
-                    //落地成功 采用手动应答模式 手动确认应答更为安全稳定
-                    channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
-                    //人为制造故障
-                    res = new HashMap<>(2);
-                    res.put("status", "200");
-                    return res;
-                }else {
-                    //落地失败 告知MQ 改状态为 cancel
-                    channel.basicNack(message.getMessageProperties().getDeliveryTag(), false, false);
-                    //人为制造故障
-                }
-            }
-        } catch (Exception e) {
-            res = new HashMap<>(2);
-            res.put("status", "500");
-            e.printStackTrace();
-            return res;
-        }
+        channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
+        log.info("body: {}", message.getBody());
         return res;
     }
 
