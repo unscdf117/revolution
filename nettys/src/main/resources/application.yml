@@ -1,9 +1,3 @@
-server:
-  port: 8889
-spring:
-  application:
-    name: shadow
-
 netty:
   server:
     port: 9876
