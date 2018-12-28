@@ -30,4 +30,14 @@ public class RedisConfigTest extends BaseTestCase {
         Object res = bucket.get();
         System.out.println(res);
     }
+
+    @Test
+    public void testMobileLogin() {
+
+    }
+
+    @Test
+    public void testWebLogin() {
+
+    }
 }

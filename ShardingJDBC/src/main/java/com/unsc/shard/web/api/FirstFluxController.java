@@ -3,8 +3,6 @@ package com.unsc.shard.web.api;
 import com.unsc.shard.bean.User;
 import com.unsc.shard.common.aop.annotation.Visit;
 import com.unsc.shard.service.UserService;
-import groovy.transform.stc.FromString;
-import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -85,4 +83,9 @@ public class FirstFluxController {
         return userService.multiTxTest();
     }
 
+    @GetMapping("/mono/user")
+    public Mono<User> getMonoUser() {
+        User user = new User(281786684163313644L, "高老板", "10000", "10000@live.cn", "gaojing", 310000, 1);
+        return Mono.just(user);
+    }
 }
