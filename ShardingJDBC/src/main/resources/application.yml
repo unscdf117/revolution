@@ -25,13 +25,17 @@ mybatis:
     default-fetch-size: 50
     default-statement-timeout: 10
     auto-mapping-unknown-column-behavior: WARNING
+#
+#zookeeper:
+#  host: 192.168.181.135
+#  port: 2181
+#  retry:
+#    times: 5
+#    interval: 5000
+#  timeout:
+#    session: 5000
+#    connect: 5000
 
-zookeeper:
+redis:
   host: 192.168.181.135
-  port: 2181
-  retry:
-    times: 5
-    interval: 5000
-  timeout:
-    session: 5000
-    connect:  5000
+  port: 6379
