@@ -14,6 +14,10 @@ import java.nio.charset.Charset;
 import java.util.Iterator;
 import java.util.List;
 
+/**
+ * 来自Kzmall.cn 快准全车件RestTemplate标准配置
+ * @author KZQCJ
+ */
 @Configuration
 public class RestTemplateConfig {
 
@@ -26,15 +30,8 @@ public class RestTemplateConfig {
 
         // 使用 utf-8 编码集的 conver 替换默认的 conver（默认的 string conver 的编码集为"ISO-8859-1"）
         List<HttpMessageConverter<?>> messageConverters = restTemplate.getMessageConverters();
-        Iterator<HttpMessageConverter<?>> iterator = messageConverters.iterator();
-        while (iterator.hasNext()) {
-            HttpMessageConverter<?> converter = iterator.next();
-            if (converter instanceof StringHttpMessageConverter) {
-                iterator.remove();
-            }
-        }
+        messageConverters.removeIf(converter -> converter instanceof StringHttpMessageConverter);
         messageConverters.add(new StringHttpMessageConverter(Charset.forName("UTF-8")));
-
         return restTemplate;
     }
 
