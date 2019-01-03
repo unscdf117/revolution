@@ -1,0 +1,30 @@
+Netty MD:
+
+Channel EventLoop ChannelFuture三大接口 这三个接口可以看作Netty网络的抽象
+
+**Channel: Socket
+EventLoop: 控制和处理并发以及流
+ChannelFuture: 异步通知**
+
+Channel接口的Api降低了Socket使用的复杂性
+ EmbeddedChannel
+ LocalServerChannel
+ NioDatagramChannel
+ NioSctpChannel
+ NioSocketChannel
+
+EventLoop是Netty的核心抽象 用来处理连接生命周期中的事件
+众多EventLoop被包含在EventLoopGroup当中 一个EventLoop在其生命周期当中只绑定一个Thread 并且所有EventLoop处理的I/O事件只再其专有的Thread上面执行
+一个Channel在其生命周期中只能注册与一个EventLoop 而一个EventLoop可以被分配给多个Channel(EventLoop对于Channel而言就是一个一对多的关系)
+
+ChannelFuture接口其中的addListener()注册了一个ChannelFutureListener用来获取某个操作的异步通知*(无论成功与否) 功效类似Future<T> 因为是异步的所以具体什么时候返回结果不定 同属于一个Channel的操作可以保证其调用顺序
+
+ChannelPipeline接口提供了ChannelHandlerChain的容器 定义该Chain在入站/出站事件流的Api 当Channel被创建时会自动分配到其专属的ChannelPipeline
+具体过程1. ChannelInitializer的实例注册到ServerBootStrap上 2.ChannelInit中的initChannel()方法调用后会往ChannelPipeline上安装入一组自定义的ChannelHandler 3.ChannelInit将自身移出ChannelPipeline
+Netty初始化或引导阶段会安装ChannelPipeline和ChannelHandler 一个ChannelPipeline里出站(OutBound)和进站(InBound)的Handler相互独立 每个方向上的Handler形成一个HandlerExecutorChain(类似SpringMVC) Handler之间也有执行链路
+
+@117: 在阅读Netty源码时发现for(;;)用的很多 相比while循环编译后的指令只有一条 而while则有4条 相比之下for(;;)的性能更好
+
+
+
+

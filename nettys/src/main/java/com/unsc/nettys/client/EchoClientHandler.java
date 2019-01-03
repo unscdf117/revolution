@@ -17,18 +17,19 @@ import java.nio.charset.Charset;
 @ChannelHandler.Sharable
 public class EchoClientHandler extends SimpleChannelInboundHandler<ByteBuf> {
 
+    /**read 每个传入的消息都会调用该方法*/
     @Override
     protected void channelRead0(ChannelHandlerContext channelHandlerContext, ByteBuf byteBuf) throws Exception {
         System.out.println("EchoClient Received: {}" + byteBuf.toString(Charset.forName("UTF-8")));
     }
-
+    /**见名知义 channel启动时候必然触发*/
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         super.channelActive(ctx);
         String string = "ofo";
         ctx.writeAndFlush(Unpooled.copiedBuffer(string.getBytes()));
     }
-
+    /**ex*/
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         super.exceptionCaught(ctx, cause);

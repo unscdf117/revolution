@@ -1,8 +1,11 @@
 package com.unsc.shard.web.api;
 
 import com.unsc.shard.bean.User;
+import com.unsc.shard.common.aop.annotation.RevolutionLock;
 import com.unsc.shard.common.aop.annotation.Visit;
 import com.unsc.shard.service.UserService;
+import org.redisson.api.RMap;
+import org.redisson.api.RedissonClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,6 +16,9 @@ import reactor.core.publisher.Mono;
 import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * 第一个Flux Controller
@@ -24,6 +30,9 @@ public class FirstFluxController {
 
     @Resource
     private UserService userService;
+
+    @Resource
+    private RedissonClient redissonClient;
 
     @GetMapping("/sos/{message}")
     public String sos(@PathVariable(value = "message") String message) {
@@ -87,5 +96,24 @@ public class FirstFluxController {
     public Mono<User> getMonoUser() {
         User user = new User(281786684163313644L, "高老板", "10000", "10000@live.cn", "gaojing", 310000, 1);
         return Mono.just(user);
+    }
+
+    @GetMapping("/lock")
+    public Mono<String> testRedisLock() throws InterruptedException {
+        ExecutorService pool = Executors.newCachedThreadPool();
+        CountDownLatch latch = new CountDownLatch(10);
+        for (var i = 0; i < 10; i++) {
+            pool.submit(() -> {
+                tryRevolutionLock(latch);
+            });
+        }
+        latch.await();
+        return Mono.just("OK 200!!");
+    }
+
+    @RevolutionLock(tryLock = true, fairLock = true, waitTime = 20L, exipreTime = 8L)
+    private void tryRevolutionLock(CountDownLatch latch) {
+        latch.countDown();
+        System.out.println(Thread.currentThread().getName() + " : " + latch.getCount());
     }
 }

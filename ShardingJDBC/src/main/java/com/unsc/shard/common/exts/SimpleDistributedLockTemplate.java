@@ -4,6 +4,7 @@ import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Resource;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -13,6 +14,11 @@ import java.util.concurrent.TimeUnit;
  */
 @Component
 public class SimpleDistributedLockTemplate implements DistributedLockTemplate {
+
+    /**
+     * Redission客户端
+     */
+    @Resource
     private RedissonClient redisson;
 
     public SimpleDistributedLockTemplate() {
@@ -53,7 +59,7 @@ public class SimpleDistributedLockTemplate implements DistributedLockTemplate {
                 return callback.process();
             }
         } catch (InterruptedException e) {
-
+            e.printStackTrace();
         } finally {
             if (lock != null && lock.isLocked()) {
                 lock.unlock();
