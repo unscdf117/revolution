@@ -7,9 +7,6 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-
 import java.net.InetSocketAddress;
 
 /**
@@ -26,11 +23,11 @@ public class EchoClient {
     @Value("${netty.client.host}")
     private String host;*/
 
-     private Integer port;
+    private Integer port;
 
     private String host;
 
-    private EchoClientHandler handler = new EchoClientHandler();
+    private EchoClientHandler inHandler = new EchoClientHandler();
 
     private void init() throws InterruptedException {
         EventLoopGroup group = new NioEventLoopGroup();
@@ -42,8 +39,8 @@ public class EchoClient {
                     .handler(new ChannelInitializer<SocketChannel>() {
                         @Override
                         public void initChannel(SocketChannel ch) {
-                            ch.pipeline().addLast(
-                                    new EchoClientHandler());
+                            ch.pipeline()
+                                    .addLast(inHandler);
                         }
                     });
             ChannelFuture f = b.connect().sync();

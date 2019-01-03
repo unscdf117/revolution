@@ -5,8 +5,6 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-import lombok.Data;
-
 import java.nio.charset.Charset;
 
 /**
@@ -26,7 +24,7 @@ public class EchoClientHandler extends SimpleChannelInboundHandler<ByteBuf> {
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         super.channelActive(ctx);
-        String string = "ofo";
+        String string = "netty echo client started: Baidu Tencent Alibaba All Must DIE!";
         ctx.writeAndFlush(Unpooled.copiedBuffer(string.getBytes()));
     }
     /**ex*/

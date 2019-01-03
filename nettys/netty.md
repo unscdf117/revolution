@@ -38,3 +38,12 @@ ByteBuf(可指定容量)维护了两套索引 readerIndex和writerIndex 起始�
 
 _@117: Netty的资源管理很有意思 每当HandlerExecutorChain中的Handler(in/out BoundHandler)处理数据时 需要保证没有任何的内存泄露 否则大流量的情况下会OOM的 在使用池化ByteBuf时(netty默认PooledByteBufAllocator)需要进行采样 在SIMPLE和ADVANCED这两个采样等级时 将113(int)进行取模 一旦命中就创建一个PhantomReference 创建一个Wrapper来包装ByteBuf和Reference 而Wrapper在执行其release()时会调用到Reference.clear() 而JVM在GC时会检查没有执行clear()的Reference并且放入ResourceLeakDetector中定义的ReferenceQueue<T>当中 而PhantomReference被创建时会去check一下有没有没有执行release()的Reference并将之清除掉 如果在JVM进行GC时有PhantomReference被塞入了ReferenceQueue则ResourceLeakDetector中的reportLeak()中的死循环 -> {从ReferenceQueue.poll()并且强转成DefaultResourceLeak对象 如果对象存在 则调用其close() 如果对象此时还没被关闭 则报告MemoryLeak}_
 
+**ChannelPipeline**接口: ChannelPipeline的本质就是一个ChannelHandler的执行链 维护了ChannelIn/OutBoundHandler 一个事件被某个ChannelHandler处理随后调用ChannelHandlerContext进行实现 然后再被转发给继承同一个父类的其他ChannelHandler处理..
+ 
+
+
+
+
+
+
+
