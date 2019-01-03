@@ -59,11 +59,11 @@ public class StupidChatServerHandler extends SimpleChannelInboundHandler<String>
         System.out.println("SimpleChatClient:"+incoming.remoteAddress()+"掉线");
     }
     @Override
-    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) { // (7)
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable t) { // (7)
         Channel incoming = ctx.channel();
         System.out.println("SimpleChatClient:"+incoming.remoteAddress()+"异常");
         // 当出现异常就关闭连接
-        cause.printStackTrace();
+        t.printStackTrace();
         ctx.close();
     }
 }
