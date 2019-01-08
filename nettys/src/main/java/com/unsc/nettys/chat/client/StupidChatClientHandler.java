@@ -1,8 +1,7 @@
 package com.unsc.nettys.chat.client;
 
-import io.netty.channel.ChannelHandler;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.channel.*;
+
 import static java.lang.System.out;
 
 /**

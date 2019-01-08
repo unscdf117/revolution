@@ -36,7 +36,7 @@ public class StupidChatServerHandler extends SimpleChannelInboundHandler<String>
         Channel incoming = ctx.channel();
         for (Channel channel : channels) {
             if (channel != incoming) {
-                channel.writeAndFlush("[" + incoming.remoteAddress() + "]" + s + "\n");
+                channel.writeAndFlush("[" + incoming.remoteAddress() + ":]  " + s + "\n");
                 //其实foreach c -> {... return;}也是可以的 只是这个continue致敬一下spring
                 continue;
             }
