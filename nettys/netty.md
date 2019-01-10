@@ -40,6 +40,27 @@ _@117: Netty的资源管理很有意思 每当HandlerExecutorChain中的Handler(
 
 **ChannelPipeline**接口: ChannelPipeline的本质就是一个ChannelHandler的执行链 维护了ChannelIn/OutBoundHandler 一个事件被某个ChannelHandler处理随后调用ChannelHandlerContext进行实现 然后再被转发给继承同一个父类的其他ChannelHandler处理..
  
+**NETTY SERVER的启动源码分析**:
+根据《netty in action》的做法 
+具体的代码逻辑在本项目的com.unsc.nettys.chat包下.
+创建了两个NioEventLoopGroup 用户给BootStrap做绑定
+/**
+     * Set the {@link EventLoopGroup} for the parent (acceptor) and the child (client). These
+     * {@link EventLoopGroup}'s are used to handle all the events and IO for {@link ServerChannel} and
+     * {@link Channel}'s.
+     */
+    public ServerBootstrap group(EventLoopGroup parentGroup, EventLoopGroup childGroup) {
+        super.group(parentGroup);
+        if (childGroup == null) {
+            throw new NullPointerException("childGroup");
+        }
+        if (this.childGroup != null) {
+            throw new IllegalStateException("childGroup set already");
+        }
+        this.childGroup = childGroup;
+        return this;
+    }
+而NioEventLoopGroup自身也维护了一个EventLoopGroup 小心机婊..: )
 
 
 
