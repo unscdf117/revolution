@@ -44,7 +44,8 @@ _@117: Netty的资源管理很有意思 每当HandlerExecutorChain中的Handler(
 根据《netty in action》的做法 
 具体的代码逻辑在本项目的com.unsc.nettys.chat包下.
 创建了两个NioEventLoopGroup 用户给BootStrap做绑定
-/**
+
+     /**
      * Set the {@link EventLoopGroup} for the parent (acceptor) and the child (client). These
      * {@link EventLoopGroup}'s are used to handle all the events and IO for {@link ServerChannel} and
      * {@link Channel}'s.
@@ -62,9 +63,71 @@ _@117: Netty的资源管理很有意思 每当HandlerExecutorChain中的Handler(
     }
 而NioEventLoopGroup自身也维护了一个EventLoopGroup 小心机婊..: )
 
+Netty 的C/S端初始化必须要有一个BootStrap 例: ServerBootStrap 代码如下:
+    
+    ServerBootstrap bs = new ServerBootstrap();
+    
+                bs.group(inGroup, outGroup)
+                        .channel(NioServerSocketChannel.class)
+                        .childHandler(new StupidChatServerInit())
+                        .option(ChannelOption.SO_BACKLOG, 256)
+                        .childOption(ChannelOption.SO_KEEPALIVE, true);
+                        
+而在BootStrap被实例化之后 需要实现其功能 需要绑定其EventLoopGroup Channel childHandler Option ChildOption 其.channel(..)中的实现如下
 
+    /**
+     * The {@link Class} which is used to create {@link Channel} instances from.
+     * You either use this or {@link #channelFactory(io.netty.channel.ChannelFactory)} if your
+     * {@link Channel} implementation has no no-args constructor.
+     */
+    public B channel(Class<? extends C> channelClass) {
+        if (channelClass == null) {
+            throw new NullPointerException("channelClass");
+        }
+        return channelFactory(new ReflectiveChannelFactory<C>(channelClass));
+    }
+入参是一个C(Channel)的子类 如果入参不是null 则调用channelFactory(new ReflectiveChannelFactory<C>(channelClass)) 通过反射Channel工厂以Channel的class对象创建Channel实例(例如上面BootStrap初始化时候传入的NioServerSocketChannel.class)
+以下是netty的ServerBootStrap的init() 相比BootStrap的init()内容更加丰富
 
+    @Override
+    void init(Channel channel) throws Exception {
+        final Map<ChannelOption<?>, Object> options = options0();
+        synchronized (options) {channel.config().setOptions(options);}
+        final Map<AttributeKey<?>, Object> attrs = attrs0();
+        synchronized (attrs) {
+            for (Entry<AttributeKey<?>, Object> e: attrs.entrySet()) {
+                AttributeKey<Object> key = (AttributeKey<Object>) e.getKey();
+                channel.attr(key).set(e.getValue());
+            }
+        }
+        ChannelPipeline p = channel.pipeline();
+        final EventLoopGroup currentChildGroup = childGroup;
+        final ChannelHandler currentChildHandler = childHandler;
+        final Entry<ChannelOption<?>, Object>[] currentChildOptions;
+        final Entry<AttributeKey<?>, Object>[] currentChildAttrs;
+        synchronized (childOptions) {currentChildOptions = childOptions.entrySet().toArray(newOptionArray(childOptions.size()));}
+        synchronized (childAttrs) {currentChildAttrs = childAttrs.entrySet().toArray(newAttrArray(childAttrs.size()));}
+        p.addLast(new ChannelInitializer<Channel>() {
+            @Override
+            public void initChannel(Channel ch) throws Exception {
+                final ChannelPipeline pipeline = ch.pipeline();
+                ChannelHandler handler = config.handler();
+                if (handler != null) {pipeline.addLast(handler); }
+                // We add this handler via the EventLoop as the user may have used a ChannelInitializer as handler.
+                // In this case the initChannel(...) method will only be called after this method returns. Because
+                // of this we need to ensure we add our handler in a delayed fashion so all the users handler are
+                // placed in front of the ServerBootstrapAcceptor.
+                ch.eventLoop().execute(new Runnable() {
+                    @Override
+                    public void run() {pipeline.addLast(new ServerBootstrapAcceptor(
+                                currentChildGroup, currentChildHandler, currentChildOptions, currentChildAttrs));
+                    }
+                });
+            }
+        });
+    }
 
+之前的所有对于ServerBootStrap的配置的init都在这个方法当中得以实现了 比较有意思的是 这里ChannelPipeline的adLast中需要传入的是某个ChannelHandler的实现类 而ChannelInitializer<>的父类也是impl了ChannelHandler的而这个ChannelInit类中做的就是ChannelPipeline的添加ChannelHandler操作..至于具体的ChannelInitial实现类 在本项目的netty module的 chat包中能看到
 
 
 
