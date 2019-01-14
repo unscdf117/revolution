@@ -1,5 +1,7 @@
 Netty MD:
 
+@117: netty源码详解 参考 https://segmentfault.com/a/1190000007282628
+
 Channel EventLoop ChannelFuture三大接口 这三个接口可以看作Netty网络的抽象
 
 **Channel: Socket
