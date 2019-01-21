@@ -6,3 +6,4 @@ DI(Dependency injection) 所谓依赖注入 是指对象创建的时候并非主
 IOC容器的根本在于BeanFactory
 ![Image text](https://github.com/unscdf117/revolution/blob/master/images/DefaultListableBeanFactory.png)
 
+BeanFactory作为各路骚BeanFactory的顶层接口里面定义了IOC容器的基本功能和规范 从类图上看其有三个子接口 分别是ListableBeanFactory(管理所有可生产的实例) HierarchicalBeanFactory(处理继承关系) AutowireCapableBeanFactory(自动装配规则) 默认的实现类为DefaultListableBeanFactory因为这厮实现了上面的接口..
