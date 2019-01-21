@@ -18,6 +18,7 @@ findAnnotationOnBean: 根据指定的Bean名称找到其类上对应的注解
 IOC容器获取Bean: 
 
   Class DefaultListableBeanFactory...
+  
 	@Override
 	public <T> T getBean(Class<T> requiredType) throws BeansException {
 		return getBean(requiredType, (Object[]) null);
