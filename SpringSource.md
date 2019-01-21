@@ -1,1 +1,6 @@
+IOC / DI
+概念: 
+IOC(Inversion of Control) 所谓控制反转就是将编码当中需要码农自己手动去build 去new 去getInstance的这一部分创建类的实例的操作交给IOC容器实现而非硬编码的方式.所以需要一个可用的IOC容器 Spring就是一个最好实现.通过配置文件等可以让IOC容器得知自己要创建的对象与对象之间的关系做到有的放矢.
+DI(Dependency injection) 所谓依赖注入 是指对象创建的时候并非主动去进行寻找依赖而是被动得接收依赖的类 也就是说并非是说在实例化对象的时候主动将其依赖的类通过某些方式进行注入
 
+IOC容器的根本在于BeanFactory
