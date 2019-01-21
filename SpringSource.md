@@ -4,3 +4,6 @@ IOC(Inversion of Control) 所谓控制反转就是将编码当中需要码农自
 DI(Dependency injection) 所谓依赖注入 是指对象创建的时候并非主动去进行寻找依赖而是被动得接收依赖的类 也就是说并非是说在实例化对象的时候主动将其依赖的类通过某些方式进行注入
 
 IOC容器的根本在于BeanFactory
+
+        revolution/images/DefaultListableBeanFactory.png
+      
