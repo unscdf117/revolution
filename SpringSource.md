@@ -38,4 +38,39 @@ IOC容器获取Bean:
 	}
   
 resolveNamedBean和getParentBeanFactory两个方法最后都会指向AbstractBeanFactory中的getBean方法 由doGetBean方法去真正执行.
-@117: Spring中 实际操作的方法都有个特点 就是方法名前面都有个do前缀
+**@117: Spring中 实际操作的方法都有个特点 就是方法名前面都有个do前缀**
+
+Bean的加载过程: FileSystemXmlApplicationContext 继承 AbstractApplicationContext调用其refresh() 启动IOC容器加载Bean
+
+    public void refresh() throws BeansException, IllegalStateException {
+        Object var1 = this.startupShutdownMonitor;
+        synchronized(this.startupShutdownMonitor) {
+            //准备刷新 获取当前的时间戳 
+            this.prepareRefresh();
+            ConfigurableListableBeanFactory beanFactory = this.obtainFreshBeanFactory();
+            this.prepareBeanFactory(beanFactory);
+
+            try {
+                this.postProcessBeanFactory(beanFactory);
+                this.invokeBeanFactoryPostProcessors(beanFactory);
+                this.registerBeanPostProcessors(beanFactory);
+                this.initMessageSource();
+                this.initApplicationEventMulticaster();
+                this.onRefresh();
+                this.registerListeners();
+                this.finishBeanFactoryInitialization(beanFactory);
+                this.finishRefresh();
+            } catch (BeansException var9) {
+                if (this.logger.isWarnEnabled()) {
+                    this.logger.warn("Exception encountered during context initialization - cancelling refresh attempt: " + var9);
+                }
+
+                this.destroyBeans();
+                this.cancelRefresh(var9);
+                throw var9;
+            } finally {
+                this.resetCommonCaches();
+            }
+
+        }
+    }
