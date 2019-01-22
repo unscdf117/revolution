@@ -88,3 +88,28 @@ Bean的加载过程: FileSystemXmlApplicationContext 继承 AbstractApplicationC
     }
 
 refresh()是IOC容器中Bean的生命周期的管理 在其中会检查是否有IOC容器存在 如果存在则会被销毁并且走完refresh()之后使用新建立的IOC容器 类似某种重启机制确保能在一个你没有玩过的全新IOC容器当中对容器进行初始化并且根据Bean的定义信息(XML Yaml等)进行载入
+
+@117: 这里BeanFactory -> ApplicationContext 会发现其中具体的IOC容器的操作是sync住的 而且是单例存在的 这很重要 毕竟一山不容二虎不允许出现多个IOC容器(这不是扯淡嘛 bean生成找谁去) 而且也能保障多线程情况下的线程安全
+
+BeanDefinition在IOC容器的注册:
+BeanDefinition是Spring中的存储Bean的信息的一种数据类型 Spring在解析配置文件的时候并没有实例化Bean而是创建了定义Bean的BeanDefinition 把Bean相关的配置信息设置进BeanDefinition 当发生依赖注入的时候才将这些配置信息创建并实例化Bean对象
+此时BeanDefinition中只是存有Bean的一部分静态信息 需要向IOC容器注册Bean的信息才能完成IOC容器的初始化过程.
+
+    public static void registerBeanDefinition(
+			BeanDefinitionHolder definitionHolder, BeanDefinitionRegistry registry)
+			throws BeanDefinitionStoreException {
+		// 获取需要解析的Bean名称
+		String beanName = definitionHolder.getBeanName();
+		// 向IOC容器注册BeanDefintion (入参Bean的名称 , BeanDefintion)
+		registry.registerBeanDefinition(beanName, definitionHolder.getBeanDefinition());
+		// 如果BeanDefintion有别名则向容器注册别名
+		String[] aliases = definitionHolder.getAliases();
+		if (aliases != null) {
+			for (String alias : aliases) {
+				registry.registerAlias(beanName, alias);
+			}
+		}
+	}
+
+@117: 这段代码来自BeanDefinitionReaderUtils 也是Spring中将解析好的BeanDefinition的包装类BeanDefinitionHolder传入进行注册 调用本类中的registerBeanDefinition方法想IOC容器注册经过解析后的Bean 实际完成注册功能的则是DefaultListableBeanFactory
+
