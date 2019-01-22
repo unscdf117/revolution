@@ -4,11 +4,19 @@ import java.io.*;
 import java.sql.SQLException;
 import java.util.*;
 import javax.sql.DataSource;
+
+import io.shardingsphere.api.config.MasterSlaveRuleConfiguration;
+import io.shardingsphere.api.config.ShardingRuleConfiguration;
 import io.shardingsphere.core.rule.ShardingRule;
 import io.shardingsphere.core.yaml.masterslave.YamlMasterSlaveConfiguration;
+import io.shardingsphere.core.yaml.masterslave.YamlMasterSlaveRuleConfiguration;
 import io.shardingsphere.core.yaml.sharding.YamlShardingConfiguration;
+import io.shardingsphere.shardingjdbc.api.MasterSlaveDataSourceFactory;
+import io.shardingsphere.shardingjdbc.api.ShardingDataSourceFactory;
+import io.shardingsphere.shardingjdbc.jdbc.core.datasource.MasterSlaveDataSource;
 import io.shardingsphere.shardingjdbc.jdbc.core.datasource.ShardingDataSource;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.ibatis.datasource.DataSourceFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
@@ -56,13 +64,23 @@ public class DataSourceConfig {
             DruidDataSource d = (DruidDataSource) v;
             d.setProxyFilters(Lists.newArrayList(statFilter));
         });
-        var dataSourceMap = new HashMap<String, DataSource>();
+
+        ShardingRuleConfiguration config = rule.getShardingRuleConfig();
+        config.setMasterSlaveRuleConfigs(getMasterSlaveRuleConfigurations());
+
+        var dataSourceMap = new HashMap<String, DataSource>(2);
         dataSourceMap.putAll(shardDataSourceMap);
         dataSourceMap.putAll(msDataSourceMap);
         return new ShardingDataSource(dataSourceMap, rule);
     }
-    
-	/**
+
+    private List<MasterSlaveRuleConfiguration> getMasterSlaveRuleConfigurations() {
+        MasterSlaveRuleConfiguration masterSlaveRuleConfig1 =
+                new MasterSlaveRuleConfiguration("ds0", "ds0", Arrays.asList("ds1"));
+        return Lists.newArrayList(masterSlaveRuleConfig1);
+    }
+
+    /**
 	 * 解析yml
 	 * @return
 	 * @throws IOException
