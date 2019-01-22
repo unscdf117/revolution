@@ -113,3 +113,100 @@ BeanDefinition是Spring中的存储Bean的信息的一种数据类型 Spring在�
 
 @117: 这段代码来自BeanDefinitionReaderUtils 也是Spring中将解析好的BeanDefinition的包装类BeanDefinitionHolder传入进行注册 调用本类中的registerBeanDefinition方法想IOC容器注册经过解析后的Bean 实际完成注册功能的则是DefaultListableBeanFactory
 
+DefaultListableBeanFactory向IOC容器注册BeanDefinition的过程: 
+
+    /** Spring这里有一个ConcurrentHashMap<String, BeanDefinition> key是BeanName Value是对应的BeanDefinition 做了个映射 :) */
+    private final Map<String, BeanDefinition> beanDefinitionMap = new ConcurrentHashMap<>(256);
+    	
+    '''此处省略一万字'''
+    
+    @Override
+    	public void registerBeanDefinition(String beanName, BeanDefinition beanDefinition)
+    			throws BeanDefinitionStoreException {
+    
+    		Assert.hasText(beanName, "Bean name must not be empty");
+    		Assert.notNull(beanDefinition, "BeanDefinition must not be null");
+            //校验解析后的BeanDefinition
+    		if (beanDefinition instanceof AbstractBeanDefinition) {
+    			try {
+    				((AbstractBeanDefinition) beanDefinition).validate();
+    			}
+    			catch (BeanDefinitionValidationException ex) {
+    				throw new BeanDefinitionStoreException(beanDefinition.getResourceDescription(), beanName,
+    						"Validation of bean definition failed", ex);
+    			}
+    		}
+            //获取BeanDefinition
+    		BeanDefinition existingDefinition = this.beanDefinitionMap.get(beanName);
+            //此处会检测IOC容器中是否有同名的BeanDefinition
+    		if (existingDefinition != null) {
+    		    //发现已注册的同名的BeanDefinition
+    			if (!isAllowBeanDefinitionOverriding()) {
+    			    //存在同名 而且不允许被覆写 嗯 抛异常
+    				throw new BeanDefinitionStoreException(beanDefinition.getResourceDescription(), beanName,
+    						"Cannot register bean definition [" + beanDefinition + "] for bean '" + beanName +
+    						"': There is already [" + existingDefinition + "] bound.");
+    			}
+    			//**可以被覆写**
+    			else if (existingDefinition.getRole() < beanDefinition.getRole()) {
+    				// e.g. was ROLE_APPLICATION, now overriding with ROLE_SUPPORT or ROLE_INFRASTRUCTURE
+    				if (logger.isWarnEnabled()) {
+    					logger.warn("Overriding user-defined bean definition for bean '" + beanName +
+    							"' with a framework-generated bean definition: replacing [" +
+    							existingDefinition + "] with [" + beanDefinition + "]");
+    				}
+    			}
+    			else if (!beanDefinition.equals(existingDefinition)) {
+    			    //如果允许被覆盖
+    				if (logger.isInfoEnabled()) {
+    				    //打日志记录覆盖信息 后注册的覆盖先注册的BeanDefinition
+    					logger.info("Overriding bean definition for bean '" + beanName +
+    							"' with a different definition: replacing [" + existingDefinition +
+    							"] with [" + beanDefinition + "]");
+    				}
+    			}
+    			//**IOC容器当中没有已经注册过的同名的Bean 走正常注册流程**
+    			else {
+    				if (logger.isDebugEnabled()) {
+    					logger.debug("Overriding bean definition for bean '" + beanName +
+    							"' with an equivalent definition: replacing [" + existingDefinition +
+    							"] with [" + beanDefinition + "]");
+    				}
+    			}
+    			this.beanDefinitionMap.put(beanName, beanDefinition);
+    		}
+    		else {
+    			if (hasBeanCreationStarted()) {
+    				// Cannot modify startup-time collection elements anymore (for stable iteration)
+    				synchronized (this.beanDefinitionMap) {
+    					this.beanDefinitionMap.put(beanName, beanDefinition);
+    					List<String> updatedDefinitions = new ArrayList<>(this.beanDefinitionNames.size() + 1);
+    					updatedDefinitions.addAll(this.beanDefinitionNames);
+    					updatedDefinitions.add(beanName);
+    					this.beanDefinitionNames = updatedDefinitions;
+    					if (this.manualSingletonNames.contains(beanName)) {
+    						Set<String> updatedSingletons = new LinkedHashSet<>(this.manualSingletonNames);
+    						updatedSingletons.remove(beanName);
+    						this.manualSingletonNames = updatedSingletons;
+    					}
+    				}
+    			}
+    			else {
+    				// Still in startup registration phase
+    				this.beanDefinitionMap.put(beanName, beanDefinition);
+    				this.beanDefinitionNames.add(beanName);
+    				this.manualSingletonNames.remove(beanName);
+    			}
+    			this.frozenBeanDefinitionNames = null;
+    		}
+    		if (existingDefinition != null || containsSingleton(beanName)) {
+    			//重置所有已经注册的BeanDefinition的缓存
+    			resetBeanDefinition(beanName);
+    		}
+    	}
+    	
+@117:  运行完毕之后BeanDefinition 被注册到IOC容器中 完成了IOC容器初始化的所有操作 这些BeanDefinition已经是真正可用的了 IOC容器管理这些BeanDefinition也正因为如此才能真正做到控制反转并且因为这些BeanDefinition才能IOC容器才有依赖注入的根据
+
+IOC流程总结: IOC容器初始化是在IOC容器的实现类中 调用refresh()完成的 之后需要将Bean载入IOC容器 通过ResourceLoader的实现类(默认DefaultResourceLoader 而ApplicationContext接口也是隐式继承者) 或者上下文环境中 从类的路径 文件系统 URL等方式来定位资源 Bean的定义被抽象成Resource交给IOC容器管理 IOC容器通过BeanDefinitionReader完成BeanDefinition的解析和注册 调用loadBeanDefinition()获得具体的BeanDefinition 再调用registerBeanDefinition() 将其注册进IOC容器当中 由IOC容器实现BeanDefinitionRegistry接口实现. 整个所谓的注册过程其实就是IOC容器当中有个ConcurrentHashMap<String, BeanDefinition> key为BeanName Value是BeanDefinition 这么一个映射关系 之后所有对Bean的操作都是围绕这个容器展开 接下去就可以通过BeanFactory的实现类或者ApplicationContext的实现类来使用IOC容器了.
+
+@117: 提到了BeanFactory 有时候会有写狗比面试官问你FactoryBean和他有什么关系的傻逼问题..这种人不是看不起人就是智障 我来解释一下区别 首先名字都不一样.BeanFactory是IOC容器的抽象(是个接口) 具体的实现是各种IOC容器 比如xxxApplicationContext xxxBeanFactory等.而FactoryBean(同样是个接口)则是一个被IOC管理的Bean需要impl的接口,是对各种处理过程和资源使用的一种抽象.FactoryBean是一个接口所以使用的时候创建的不是这个接口而是一个具体的实现类 是一种**抽象工厂模式**的具体体现. Spring包括了大量通用资源和服务访问抽象的FactoryBean的实现 比如JNDI Proxy
