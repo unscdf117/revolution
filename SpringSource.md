@@ -45,27 +45,39 @@ Bean的加载过程: FileSystemXmlApplicationContext 继承 AbstractApplicationC
     public void refresh() throws BeansException, IllegalStateException {
         Object var1 = this.startupShutdownMonitor;
         synchronized(this.startupShutdownMonitor) {
-            //准备刷新 获取当前的时间戳 
+            //准备刷新 获取当前的时间戳 给IOC容器设置sync标识
             this.prepareRefresh();
+            //告知子类调用refreshBeanFactory() 载入Bean的配置信息
             ConfigurableListableBeanFactory beanFactory = this.obtainFreshBeanFactory();
+            //为BeanFactory配置 比如: 类加载器 事件处理器等..
             this.prepareBeanFactory(beanFactory);
 
             try {
+                // 为IOC容器的一些子类设定BeanPostProcessor
                 this.postProcessBeanFactory(beanFactory);
+                //调用所有注册的BeanFactoryPostProcessor的Bean
                 this.invokeBeanFactoryPostProcessors(beanFactory);
+                //给BeanFactory中注册 BeanPostProcessor(为Bean后置处理器 监听IOC容器所触发的事件)
                 this.registerBeanPostProcessors(beanFactory);
+                //初始化信息源 解决 i18n
                 this.initMessageSource();
+                //初始化IOC容器事件传播器
                 this.initApplicationEventMulticaster();
+                //调用其子类中的某些(奇葩)Bean的初始化方法
                 this.onRefresh();
+                //注册事件传播器的监听器
                 this.registerListeners();
+                //初始化所有剩下的单例Bean
                 this.finishBeanFactoryInitialization(beanFactory);
+                //初始化IOC容器LifeCycleProcessor 发布IOC容器的生命周期事件
                 this.finishRefresh();
             } catch (BeansException var9) {
                 if (this.logger.isWarnEnabled()) {
                     this.logger.warn("Exception encountered during context initialization - cancelling refresh attempt: " + var9);
                 }
-
+                //销毁已经创建的单例Bean
                 this.destroyBeans();
+                //取消refresh() 并且重置IOC容器的sync标识
                 this.cancelRefresh(var9);
                 throw var9;
             } finally {
@@ -74,3 +86,5 @@ Bean的加载过程: FileSystemXmlApplicationContext 继承 AbstractApplicationC
 
         }
     }
+
+refresh()是IOC容器中Bean的生命周期的管理 在其中会检查是否有IOC容器存在 如果存在则会被销毁并且走完refresh()之后使用新建立的IOC容器 类似某种重启机制确保能在一个你没有玩过的全新IOC容器当中对容器进行初始化并且根据Bean的定义信息(XML Yaml等)进行载入
