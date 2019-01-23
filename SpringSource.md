@@ -1,5 +1,5 @@
 IOC / DI
-概念: 
+
 IOC(Inversion of Control) 所谓控制反转就是将编码当中需要码农自己手动去build 去new 去getInstance的这一部分创建类的实例的操作交给IOC容器实现而非硬编码的方式.所以需要一个可用的IOC容器 Spring就是一个最好实现.通过配置文件等可以让IOC容器得知自己要创建的对象与对象之间的关系做到有的放矢.
 DI(Dependency injection) 所谓依赖注入 是指对象创建的时候并非主动去进行寻找依赖而是被动得接收依赖的类 也就是说并非是说在实例化对象的时候主动将其依赖的类通过某些方式进行注入
 
@@ -9,7 +9,9 @@ IOC容器的根本在于BeanFactory
 BeanFactory作为各路骚BeanFactory的顶层接口里面定义了IOC容器的基本功能和规范 从类图上看其有三个子接口 分别是ListableBeanFactory(管理所有可生产的实例) HierarchicalBeanFactory(处理继承关系) AutowireCapableBeanFactory(自动装配规则) 默认的实现类为DefaultListableBeanFactory因为这厮实现了上面的接口
 ![Image text](https://github.com/unscdf117/revolution/blob/master/images/ListableBeanFactoryMethods.png)
 BeanDefinition相关: 获取BeanDefinition的数量 名称的数组 指定类型名称的数组
+
 @117: BeanDefinition是Spring中非常得劲的一个类 每个BeanDefinition都包含某个类在BeanFactory中的所有属性描述..
+
 BeanNames4Type相关: 根据指定的类型(包含子类) 获取其对应的所有Bean的名称
 BeansOfType: 根据类型(包括子类) 返回指定Bean的名称和Bean的Map
 getBeanWithAnnotation和getBeanNames4Annottaion则分别根据注解类型查找Bean的Map和Bean的Map
@@ -38,6 +40,7 @@ IOC容器获取Bean:
 	}
   
 resolveNamedBean和getParentBeanFactory两个方法最后都会指向AbstractBeanFactory中的getBean方法 由doGetBean方法去真正执行.
+
 **@117: Spring中 实际操作的方法都有个特点 就是方法名前面都有个do前缀**
 
 Bean的加载过程: FileSystemXmlApplicationContext 继承 AbstractApplicationContext调用其refresh() 启动IOC容器加载Bean
@@ -210,3 +213,7 @@ DefaultListableBeanFactory向IOC容器注册BeanDefinition的过程:
 IOC流程总结: IOC容器初始化是在IOC容器的实现类中 调用refresh()完成的 之后需要将Bean载入IOC容器 通过ResourceLoader的实现类(默认DefaultResourceLoader 而ApplicationContext接口也是隐式继承者) 或者上下文环境中 从类的路径 文件系统 URL等方式来定位资源 Bean的定义被抽象成Resource交给IOC容器管理 IOC容器通过BeanDefinitionReader完成BeanDefinition的解析和注册 调用loadBeanDefinition()获得具体的BeanDefinition 再调用registerBeanDefinition() 将其注册进IOC容器当中 由IOC容器实现BeanDefinitionRegistry接口实现. 整个所谓的注册过程其实就是IOC容器当中有个ConcurrentHashMap<String, BeanDefinition> key为BeanName Value是BeanDefinition 这么一个映射关系 之后所有对Bean的操作都是围绕这个容器展开 接下去就可以通过BeanFactory的实现类或者ApplicationContext的实现类来使用IOC容器了.
 
 @117: 提到了BeanFactory 有时候会有写狗比面试官问你FactoryBean和他有什么关系的傻逼问题..这种人不是看不起人就是智障 我来解释一下区别 首先名字都不一样.BeanFactory是IOC容器的抽象(是个接口) 具体的实现是各种IOC容器 比如xxxApplicationContext xxxBeanFactory等.而FactoryBean(同样是个接口)则是一个被IOC管理的Bean需要impl的接口,是对各种处理过程和资源使用的一种抽象.FactoryBean是一个接口所以使用的时候创建的不是这个接口而是一个具体的实现类 是一种**抽象工厂模式**的具体体现. Spring包括了大量通用资源和服务访问抽象的FactoryBean的实现 比如JNDI Proxy
+@117: IOC容器懒加载(LazyInit) 实现预实例化 -> IOC容器在初始化的时候只是对BeanDefinition进行载入 对Bean所依赖的资源进行定位 并且向IOC容器进行注册 此时IOC容器对Bean的依赖注入并没有发生 依赖注入是在Java应用第一次向IOC容器请求Bean的时候通过IOC容器.getBean()时才完成依赖注入 如果某个Bean在定义时配置了LazyInit属性 IOC容器会在初始化的时候对该Bean也一并进行预实例化 此时就不用再次初始化Bean和对Bean进行依赖注入了 Java应用从IOC容器.getBean()
+
+AOP相关:
+切面(Aspect) -> 
