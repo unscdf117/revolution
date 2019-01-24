@@ -39,7 +39,7 @@ IOC容器获取Bean:
 		throw new NoSuchBeanDefinitionException(requiredType);
 	}
   
-resolveNamedBean和getParentBeanFactory两个方法最后都会指向AbstractBeanFactory中的getBean方法 由doGetBean方法去真正执行.
+resolveNamedBean和getParentBeanFactory两个方法最后都会指向AbstractBeanFactory中的getBean方法(此过程中BeanFactoryUtils会调用transFormBeanName(String name) 取出FactoryBean修饰符比如& $..) 由doGetBean方法去真正执行.
 
 **@117: Spring中 实际操作的方法都有个特点 就是方法名前面都有个do前缀**
 
