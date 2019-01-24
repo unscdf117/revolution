@@ -216,7 +216,44 @@ IOC流程总结: IOC容器初始化是在IOC容器的实现类中 调用refresh(
 
 @117: 实例化Bean和依赖注入 -> IOC容器懒加载(LazyInit) 实现预实例化 -> IOC容器在初始化的时候只是对BeanDefinition进行载入 对Bean所依赖的资源进行定位 并且向IOC容器进行注册 此时IOC容器对Bean的依赖注入并没有发生 依赖注入是在Java应用第一次向IOC容器请求Bean的时候通过IOC容器.getBean()时才完成依赖注入 如果某个Bean在定义时配置了LazyInit属性 IOC容器会在初始化的时候对该Bean也一并进行预实例化 此时就不用再次初始化Bean和对Bean进行依赖注入了 Java应用从IOC容器.getBean()
 
-@117: 依赖检查 -> Spring IOC容器只处理单例模式下的循环依赖(Scope默认是Singleton哟) 如果是原型模式的话直接抛BeanCurrentlyInCreationException Spring在创建单例Bean的时候(可以看上面部分)不是等Bean完全实例化之后才加入缓存 而是在创建Bean之前会把其ObjectFactory先加入缓存 这样**一旦需要创建某个Bean的时候如果需要依赖其他Bean会直接使用其ObjectFactory** 但是原型模式(ProtoType) 没办法使用到缓存所以Spring容器对其循环依赖只能不处理.
+@117: 依赖检查和依赖处理 -> Spring IOC容器只处理单例模式下的循环依赖(Scope默认是Singleton哟) 如果是原型模式的话直接抛BeanCurrentlyInCreationException Spring在创建单例Bean的时候(可以看上面部分)不是等Bean完全实例化之后才加入缓存 而是在创建Bean之前会把其ObjectFactory先加入缓存 这样**一旦需要创建某个Bean的时候如果需要依赖其他Bean会直接使用其ObjectFactory** 但是原型模式(ProtoType) 没办法使用到缓存所以Spring容器对其循环依赖只能不处理. 从上面的@117能看到 一个Bean如果有依赖其他Bean IOC容器初始化这个Bean之前会先初始化其依赖Bean(b -> AbstractBeanFactory.java) 源码如下:
+
+    // 处理所依赖的 bean
+    String[] dependsOn = mbd.getDependsOn();
+    if (dependsOn != null) {
+        for (String dep : dependsOn) {
+            // <1> 若给定的依赖 bean 已经注册为依赖给定的 bean
+            // 即循环依赖的情况，抛出 BeanCreationException 异常
+            if (isDependent(beanName, dep)) {
+                throw new BeanCreationException(mbd.getResourceDescription(), beanName,
+                        "Circular depends-on relationship between '" + beanName + "' and '" + dep + "'");
+            }
+            // <2> 缓存依赖调用
+            registerDependentBean(dep, beanName);
+            try {
+                // <3> 递归处理依赖 Bean
+                getBean(dep);
+            } catch (NoSuchBeanDefinitionException ex) {
+                throw new BeanCreationException(mbd.getResourceDescription(), beanName,
+                        "'" + beanName + "' depends on missing bean '" + dep + "'", ex);
+            }
+        }
+    }
+
+而isDependent(beanName, dep) -> <1> 具体的检查循环依赖的方法 幕后的源码:
+    
+    /**保存的是依赖 beanName 之间的映射关系：beanName - > 依赖 beanName 的集合*/
+    private final Map<String, Set<String>> dependentBeanMap = new ConcurrentHashMap<>(64);
+    
+    protected boolean isDependent(String beanName, String dependentBeanName) {
+    	synchronized (this.dependentBeanMap) {
+    		return isDependent(beanName, dependentBeanName, null);
+    	}
+    }
+
+这里的dependentBeanMap(ConcurrentHashMap)保存的就是依赖的映射关系 beanName(BeanABC) -> Set<BeanABC依赖的Bean的beanName>
+
+
 
 AOP相关:
 切面(Aspect) -> 
