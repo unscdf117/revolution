@@ -253,5 +253,42 @@ IOC流程总结: IOC容器初始化是在IOC容器的实现类中 调用refresh(
 
 这里的dependentBeanMap(ConcurrentHashMap)保存的就是依赖的映射关系 beanName(BeanABC) -> Set<BeanABC依赖的Bean的beanName>
 
-AOP相关:
-切面(Aspect) -> 
+BeanWrapper: 装饰者模式的绝佳体现! 详情在AbstractAutowireCapableBeanFactory中的doCreateBean()
+
+    protected Object doCreateBean(final String beanName, final RootBeanDefinition mbd, final @Nullable Object[] args)
+			throws BeanCreationException {
+
+		// 实例化Bean的过程...
+		BeanWrapper instanceWrapper = null;
+		if (mbd.isSingleton()) {
+			instanceWrapper = this.factoryBeanInstanceCache.remove(beanName);
+		}
+		if (instanceWrapper == null) {
+			instanceWrapper = createBeanInstance(beanName, mbd, args);
+		}
+		final Object bean = instanceWrapper.getWrappedInstance();
+		Class<?> beanType = instanceWrapper.getWrappedClass();
+		if (beanType != NullBean.class) {
+			mbd.resolvedTargetType = beanType;
+		}
+		.......
+	}
+
+由此能够看出从BeanDefinition开始到Bean完全被实例化出来 中间会有一个BeanWrapper 也就是实例化Bean的包装类 BeanWrapper是一个借口extends了PropertyAccessor(可访问属性的通用性接口 比如Bean的属性或者对象中的字段) PropertyEditorRegistry(注册Bean的PropertyEditors这个Editor用来改变制定的property属性的类型) TypeConverter(Spring 3以后不再采用PropertyEditor作为默认的类型转换接口而专用ConversionService(线程安全)) 由于BeanWrapper接口继承了这三个接口 所以其实现类BeanWrapperImpl能够有三重功效 分别是: 1.属性编辑器 2.属性编辑器的注册器 3.类型转换器  于是乎BeanWrapper可以作为Spring中Bean的基础接口 通过BeanFactory或者DataBinder进行隐式使用 提供Bean的操作如下: 1.获取或者设置属性的值  2.获取或者涉资Bean属性的描述 3.查询Bean的属性的可读/可写能力
+
+ApplicationContext: BeanFactory相对比较简陋 生产环境中都在用ApplicationContext 看一下BeanFactory的类图就能看到ApplicationContext接口也隐式继承了BeanFactory
+
+ApplicationContext父接口: 
+1. BeanFactory: Bean管理顶层接口Bean工厂 ApplicationContext继承了HierarchicalBeanFactory和ListableBeanFactory
+2. ApplicationEventPublisher: 封装事件发布的接口 向事件监听器(Listener)发布消息
+3. ResourceLoader: Spring加载资源的顶层接口 从某个源(配置文件路径..)加载配置文件 ApplicationContext继承ResourceLoader的子类ResourcePatternResolver(将资源路径解析为Resource对象的接口)
+4. MessageSource: i18n支持
+5. EnvironmentCapable: 用于获取Environment的接口
+
+ApplicationCtx的接口:
+1. WebApplicationCtx: 只有一个getServletCtx() 提供Servlet的上下文
+2. ConfigurableApplicationCtx: 
+
+---------------
+
+AOP相关: 
