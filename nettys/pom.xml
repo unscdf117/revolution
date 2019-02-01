@@ -11,7 +11,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.unsc</groupId>
-    <artifactId>shadow</artifactId>
+    <artifactId>nettys</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>nettys</name>
     <description>nettys</description>

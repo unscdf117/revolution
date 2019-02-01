@@ -253,8 +253,5 @@ IOC流程总结: IOC容器初始化是在IOC容器的实现类中 调用refresh(
 
 这里的dependentBeanMap(ConcurrentHashMap)保存的就是依赖的映射关系 beanName(BeanABC) -> Set<BeanABC依赖的Bean的beanName>
 
-Bean的生命周期: 
-
-
 AOP相关:
 切面(Aspect) -> 
