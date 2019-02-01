@@ -43,7 +43,7 @@ resolveNamedBean和getParentBeanFactory两个方法最后都会指向AbstractBea
 
 **@117: Spring中 实际操作的方法都有个特点 就是方法名前面都有个do前缀**
 
-Bean的加载过程: FileSystemXmlApplicationContext 继承 AbstractApplicationContext调用其refresh() 启动IOC容器加载Bean
+**Bean的加载过程**: FileSystemXmlApplicationContext 继承 AbstractApplicationContext调用其refresh() 启动IOC容器加载Bean
 
     public void refresh() throws BeansException, IllegalStateException {
         Object var1 = this.startupShutdownMonitor;
@@ -252,6 +252,9 @@ IOC流程总结: IOC容器初始化是在IOC容器的实现类中 调用refresh(
     }
 
 这里的dependentBeanMap(ConcurrentHashMap)保存的就是依赖的映射关系 beanName(BeanABC) -> Set<BeanABC依赖的Bean的beanName>
+
+Bean的生命周期: 
+
 
 AOP相关:
 切面(Aspect) -> 
