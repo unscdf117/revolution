@@ -1,20 +1,19 @@
 package com.unsc.shard.service.impl;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.math.BigDecimal;
+import java.util.*;
+import java.util.concurrent.*;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.unsc.shard.bean.User;
 import com.unsc.shard.mapper.UserMapper;
 import com.unsc.shard.service.UserService;
+import com.unsc.shard.shadow.dto.UserDto;
 import com.unsc.shard.shadow.facade.interfaces.UserBizFacade;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.ibatis.jdbc.Null;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.web.client.RestTemplate;
 
@@ -36,6 +35,9 @@ public class UserServiceImpl implements UserService {
 
     @Resource
     private TransactionTemplate tx;
+
+    @Resource
+    private UserBizFacade userBizFacade;
 
     @Override
     public Long save(User user) {
@@ -96,5 +98,59 @@ public class UserServiceImpl implements UserService {
             return flag;
         });*/
         return "自己看日志";
+    }
+
+    @Override
+    public String mockOrderOperateWithUser(User user, List<User> list) {
+        //业务逻辑
+        UserDto dto = new UserDto();
+        BeanUtils.copyProperties(user, dto);
+
+        ThreadPoolExecutor tpe = new ThreadPoolExecutor(20, 1000, 20, TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>(2, true));
+
+        try {
+            tpe.submit(() -> {
+                boolean f1 = userBizFacade.checkAvailableUser(dto);
+                boolean f2 = userBizFacade.checkUserInfoFromNC(dto);
+                System.out.println("Sku信息检查 库存信息检查");
+                return f1 && f2;
+            }).get();
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+            return "False";
+        }
+
+        try {
+            var newList = new ArrayList<User>();
+
+            //这里模拟拆单 转换订单 计算金额等操作....哎 作孽
+            list.forEach(u -> {
+                //phone 替代 金额
+                String amount = u.getPhone();
+                //cityID是int 代替数量
+                Integer count = u.getCityId();
+                for (int i = 0; i < 5; i++) {
+                    //哎 实际情况 狗比 模拟NC的BigDecimal 草泥马
+                    BigDecimal decimalAmount = new BigDecimal(amount);
+                    BigDecimal decimalCount = new BigDecimal(count);
+                    BigDecimal total = decimalAmount.multiply(decimalCount);
+                    u.setEmail(total.toString());
+                }
+                newList.add(u);
+            });
+            //接下去模拟下单..传输给OMS/NC + 本地落地
+            tpe.submit(() -> {
+                try {
+                    System.out.println("下发下游");
+                    Thread.sleep(35);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            });
+            return "True";
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "False";
+        }
     }
 }

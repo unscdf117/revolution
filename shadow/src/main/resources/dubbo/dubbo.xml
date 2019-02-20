@@ -14,7 +14,7 @@
     <!--<dubbo:reference interface="com.unsc.service.ItemService" id="itemService"/>-->
 
     <!--&lt;!&ndash;dubbo暴露接口&ndash;&gt;-->
-    <dubbo:service interface="com.unsc.shard.shadow.facade.interfaces.UserBizFacade" ref="userBizFacade" timeout="500000"/>
+    <dubbo:service interface="com.unsc.shard.shadow.facade.interfaces.UserBizFacade" ref="userBizFacade" timeout="5000"/>
 
     <bean id="userBizFacade" class="com.unsc.shard.shadow.biz.facade.impl.UserBizFacadeImpl"/>
 

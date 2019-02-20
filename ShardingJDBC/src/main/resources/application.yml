@@ -23,7 +23,7 @@ mybatis:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
     map-underscore-to-camel-case: true
     default-fetch-size: 50
-    default-statement-timeout: 10
+    default-statement-timeout: 5000
     auto-mapping-unknown-column-behavior: WARNING
 #
 #zookeeper:

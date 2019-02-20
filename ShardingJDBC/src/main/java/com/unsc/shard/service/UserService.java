@@ -2,6 +2,8 @@ package com.unsc.shard.service;
 
 import com.unsc.shard.bean.User;
 
+import java.util.List;
+
 /**
  * @author DELL
  */
@@ -29,4 +31,11 @@ public interface UserService {
 
     String multiTxTest();
 
+    /**
+     * 压力测试使用 使用User替代Order
+     * @param user user 替代 order
+     * @param list
+     * @return 呵呵
+     */
+    String mockOrderOperateWithUser(User user, List<User> list);
 }

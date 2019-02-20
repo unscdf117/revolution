@@ -6,8 +6,6 @@ import com.unsc.shard.shadow.facade.interfaces.UserBizFacade;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -40,5 +38,29 @@ public class UserBizFacadeImpl implements UserBizFacade {
         log.info("is Array ? : {}", array);
         log.info("finished");
         return "200";
+    }
+
+    @Override
+    public boolean checkUserInfoFromNC(UserDto dto) {
+        //因为用友NC系统的脑残特性 所以沈阳弄了一个DataCenter 这个比起库存中心要快一点
+        try {
+            Thread.sleep(20);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public boolean checkAvailableUser(UserDto dto) {
+        //沈阳那边的StockCenter其实速度并不算快 因为要拆单 匹仓匹库存..唉
+        try {
+            Thread.sleep(40);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
     }
 }
