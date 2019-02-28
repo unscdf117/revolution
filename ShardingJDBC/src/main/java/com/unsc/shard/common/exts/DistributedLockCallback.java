@@ -3,7 +3,7 @@ package com.unsc.shard.common.exts;
 /**
  * 分布式锁回调
  * @author DELL
- * @date 2019/1/2
+ * @date 2018/1/2
  */
 public interface DistributedLockCallback<T> {
 
