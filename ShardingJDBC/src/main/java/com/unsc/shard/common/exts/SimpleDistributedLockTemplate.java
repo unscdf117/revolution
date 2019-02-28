@@ -10,7 +10,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * 分布式锁 Template 实现
  * @author DELL
- * @date 2019/1/2
+ * @date 2018/1/2
  */
 @Component
 public class SimpleDistributedLockTemplate implements DistributedLockTemplate {
