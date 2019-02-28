@@ -5,7 +5,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * 分布式锁模板
  * @author DELL
- * @date 2019/1/2
+ * @date 2018/1/2
  */
 public interface DistributedLockTemplate {
  
