@@ -6,7 +6,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * 革命 锁 注解
  * @author DELL
- * @date 2019/1/2
+ * @date 2018/1/2
  */
 @Inherited
 @Target({ElementType.METHOD})
